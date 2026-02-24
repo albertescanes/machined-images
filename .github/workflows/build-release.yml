@@ -9,7 +9,7 @@ on:
       - mkosi.conf.d/**
       - mkosi.nspawn
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
