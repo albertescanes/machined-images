@@ -43,7 +43,7 @@ jobs:
         run: mkosi -d ${{ matrix.distro }} -o ${{ env.OUTPUT_NAME }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.OUTPUT_NAME }}
           path: mkosi.output/${{ env.OUTPUT_NAME }}.*
