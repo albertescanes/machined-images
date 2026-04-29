@@ -1,0 +1,70 @@
+name: Build and Release
+
+on:
+  schedule:
+    - cron: "5 10 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        target:
+          - distro: centos
+            release: 10
+          - distro: fedora
+            release: 44
+          - distro: fedora
+            release: rawhide
+          - distro: rhel-ubi
+            release: 10
+        arch: [x86-64, arm64]
+        include:
+          - arch: x86-64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Set up mkosi
+        uses: systemd/mkosi@main
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build image
+        run: mkosi -d ${{ matrix.target.distro }} -r ${{ matrix.target.release }}
+
+      - name: Generate checksum file
+        run: for f in *.*; do sha256sum $f > $f.sha256; done
+        working-directory: mkosi.output
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target.distro }}-${{ matrix.target.release }}_${{ matrix.arch }}
+          path: mkosi.output/*.*
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --cleanup-tag -y || true
+          gh release create latest artifacts/* -t $(date -u +%F)
