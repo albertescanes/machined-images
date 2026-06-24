@@ -31,7 +31,7 @@ jobs:
         uses: systemd/mkosi@main
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Build image
         run: mkosi -d ${{ matrix.target.distro }} -r ${{ matrix.target.release }}
