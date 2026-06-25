@@ -12,12 +12,16 @@ jobs:
         target:
           - distro: centos
             release: 10
+          - distro: centos
+            release: 9
           - distro: fedora
             release: 44
           - distro: fedora
             release: rawhide
           - distro: rhel-ubi
             release: 10
+          - distro: rhel-ubi
+            release: 9
         arch: [x86-64, arm64]
         include:
           - arch: x86-64
